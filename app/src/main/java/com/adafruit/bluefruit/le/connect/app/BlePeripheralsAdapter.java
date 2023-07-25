@@ -5,8 +5,10 @@ import static com.adafruit.bluefruit.le.connect.ble.central.BleScanner.kDeviceTy
 import static com.adafruit.bluefruit.le.connect.ble.central.BleScanner.kDeviceType_Uart;
 import static com.adafruit.bluefruit.le.connect.ble.central.BleScanner.kDeviceType_UriBeacon;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.ParcelUuid;
 import android.os.Parcelable;
 import android.text.Html;
@@ -22,6 +24,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -323,6 +326,17 @@ class BlePeripheralsAdapter extends RecyclerView.Adapter<BlePeripheralsAdapter.V
         if (name == null || name.isEmpty()) {
             name = identifier;
         }
+
+        // Connect immediately if name is Feather if not connected
+        if (blePeripheral.getConnectionState() == BlePeripheral.STATE_DISCONNECTED && name != null && name.toLowerCase().contains("feather")) {
+            try {
+                blePeripheral.connect(mContext);
+            } catch (SecurityException e) {
+                Log.e(TAG, "connectButton security exception: " + e);
+            }
+        }
+
+
 
         holder.deviceAddress = identifier;
         holder.nameTextView.setText(name);
